@@ -6,8 +6,11 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   let batch: string | null = null;
+  let courseFee = 0;
   try {
-    batch = (await getSettings()).currentBatch;
+    const s = await getSettings();
+    batch = s.currentBatch;
+    courseFee = s.courseFee;
   } catch (e) {
     console.error(e);
   }
@@ -17,7 +20,7 @@ export default async function Home() {
       <BrandHeader batch={batch ?? undefined} />
       <h2 className="mb-4 text-center text-lg font-semibold text-foreground/80 sm:mb-6 sm:text-xl">Student Registration Form</h2>
       {batch ? (
-        <RegistrationForm batch={batch} />
+        <RegistrationForm batch={batch} courseFee={courseFee} />
       ) : (
         <Alert>Registration is temporarily unavailable. Please call 070 309 9433.</Alert>
       )}

@@ -3,7 +3,8 @@ import { z } from "zod";
 export const SKILL_LEVELS = ["Complete Beginner", "Know Basics", "Intermediate"] as const;
 export const CLASS_MODES = ["In-person (Physical)", "Online"] as const;
 export const PREFERRED_DAYS = ["Weekdays", "Weekends"] as const;
-export const STARTER_KIT = ["Yes (With full materials)", "No (I will bring my own)"] as const;
+/** Every student gets the starter kit free; stored on the student row for the record. */
+export const STARTER_KIT_NOTE = "Free starter kit (included)";
 export const STUDENT_STATUS = ["Active", "Completed", "Dropped"] as const;
 export const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Online"] as const;
 export const ATTENDANCE_STATUS = ["Present", "Absent"] as const;
@@ -29,7 +30,6 @@ export const registrationSchema = z
     skillLevel: z.enum(SKILL_LEVELS, { message: "Select your skill level" }),
     classMode: z.enum(CLASS_MODES, { message: "Select a class mode" }),
     preferredDays: z.enum(PREFERRED_DAYS, { message: "Select your preferred days" }),
-    starterKit: z.enum(STARTER_KIT, { message: "Tell us if you need a starter kit" }),
     emergencyName: z.string().trim().max(100).default(""),
     emergencyPhone: z
       .string()
@@ -64,8 +64,7 @@ export const studentPatchSchema = z.object({
 
 export const settingsSchema = z.object({
   currentBatch: z.string().trim().min(1, "Batch is required").max(40),
-  feeWithKit: z.coerce.number().min(0),
-  feeWithoutKit: z.coerce.number().min(0),
+  courseFee: z.coerce.number().min(0, "Fee can't be negative"),
 });
 
 /** Turn zod issues into { field: message } for forms. */

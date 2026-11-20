@@ -6,8 +6,7 @@ import { api, ApiError } from "@/lib/client";
 
 interface Settings {
   currentBatch: string;
-  feeWithKit: number | string;
-  feeWithoutKit: number | string;
+  courseFee: number | string;
 }
 
 export default function SettingsPage() {
@@ -46,14 +45,9 @@ export default function SettingsPage() {
           <Field label="Current batch (shown on the registration form)" error={errors.currentBatch} hint='e.g. "Batch 02". New students are added to this batch.'>
             <Input value={s.currentBatch} onChange={(e) => setS({ ...s, currentBatch: e.target.value })} />
           </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Course fee — with starter kit (Rs.)" error={errors.feeWithKit}>
-              <Input type="number" min={0} value={s.feeWithKit} onChange={(e) => setS({ ...s, feeWithKit: e.target.value })} />
-            </Field>
-            <Field label="Course fee — own materials (Rs.)" error={errors.feeWithoutKit}>
-              <Input type="number" min={0} value={s.feeWithoutKit} onChange={(e) => setS({ ...s, feeWithoutKit: e.target.value })} />
-            </Field>
-          </div>
+          <Field label="Full course fee (Rs.)" error={errors.courseFee} hint="Shown on the registration form. The starter kit is included free.">
+            <Input type="number" min={0} inputMode="numeric" value={s.courseFee} onChange={(e) => setS({ ...s, courseFee: e.target.value })} />
+          </Field>
           <p className="text-xs text-muted-foreground">Changing fees only affects new registrations. Edit an existing student&apos;s fee from the Students page.</p>
           {msg && <Alert kind={msg.kind}>{msg.text}</Alert>}
           <Button type="submit" disabled={busy} className="h-11 w-full sm:h-10 sm:w-auto">{busy ? "Saving…" : "Save settings"}</Button>

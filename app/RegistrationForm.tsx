@@ -3,17 +3,9 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, Button, Checkbox, Field, Input, RadioCards, Section, Textarea } from "@/components/kit";
-import { Loader2Icon } from "lucide-react";
-import {
-  CLASS_MODES,
-  DECLARATION,
-  PREFERRED_DAYS,
-  SKILL_LEVELS,
-  STARTER_KIT,
-  fieldErrors,
-  registrationSchema,
-} from "@/lib/schema";
-import { ageFromDob, todayISO } from "@/lib/format";
+import { GiftIcon, Loader2Icon, SparklesIcon, WalletIcon } from "lucide-react";
+import { CLASS_MODES, DECLARATION, PREFERRED_DAYS, SKILL_LEVELS, fieldErrors, registrationSchema } from "@/lib/schema";
+import { ageFromDob, money, todayISO } from "@/lib/format";
 import { api, ApiError } from "@/lib/client";
 
 const EMPTY = {
@@ -24,13 +16,21 @@ const EMPTY = {
   skillLevel: "" as (typeof SKILL_LEVELS)[number] | "",
   classMode: "" as (typeof CLASS_MODES)[number] | "",
   preferredDays: "" as (typeof PREFERRED_DAYS)[number] | "",
-  starterKit: "" as (typeof STARTER_KIT)[number] | "",
   emergencyName: "",
   emergencyPhone: "",
   agreed: false,
 };
 
-export default function RegistrationForm({ batch }: { batch: string }) {
+/** "Batch 02" -> "2nd" (null if the batch name has no number). */
+function batchOrdinal(batch: string): string | null {
+  const n = Number(batch.match(/\d+/)?.[0]);
+  if (!n) return null;
+  const suffix = n % 100 >= 11 && n % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th";
+  return `${n}${suffix}`;
+}
+
+export default function RegistrationForm({ batch, courseFee }: { batch: string; courseFee: number }) {
+  const ordinal = batchOrdinal(batch);
   const router = useRouter();
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -119,10 +119,36 @@ export default function RegistrationForm({ batch }: { batch: string }) {
             <RadioCards name="preferredDays" options={PREFERRED_DAYS} value={form.preferredDays} onChange={(v) => set("preferredDays", v)} invalid={!!errors.preferredDays} />
           </Field>
         </div>
-        <div data-field="starterKit">
-          <Field label="Starter Kit Needed?" required error={errors.starterKit}>
-            <RadioCards name="starterKit" options={STARTER_KIT} value={form.starterKit} onChange={(v) => set("starterKit", v)} invalid={!!errors.starterKit} />
-          </Field>
+
+        {/* Course fee & starter kit info (no choice needed — the kit is included free for everyone) */}
+        <div className="overflow-hidden rounded-xl border border-brand-200 bg-accent">
+          <div className="flex items-center gap-2 border-b border-brand-200/70 px-4 py-2.5 text-sm font-semibold text-accent-foreground">
+            <SparklesIcon className="size-4 shrink-0" aria-hidden />
+            Course details{ordinal ? ` — ${ordinal} batch of this course` : ""}
+          </div>
+          <dl className="grid divide-y divide-brand-200/70 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+            <div className="flex items-start gap-3 px-4 py-3.5">
+              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-card text-primary shadow-xs">
+                <WalletIcon className="size-4.5" aria-hidden />
+              </span>
+              <div>
+                <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Full course fee</dt>
+                <dd className="text-xl font-bold text-foreground tabular-nums">{money(courseFee)}</dd>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 px-4 py-3.5">
+              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-card text-primary shadow-xs">
+                <GiftIcon className="size-4.5" aria-hidden />
+              </span>
+              <div>
+                <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Starter kit</dt>
+                <dd className="font-semibold text-foreground">
+                  Provided <span className="text-primary">free</span>
+                  <span className="block text-xs font-normal text-muted-foreground">Full materials included — nothing extra to buy.</span>
+                </dd>
+              </div>
+            </div>
+          </dl>
         </div>
       </Section>
 
