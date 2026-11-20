@@ -45,9 +45,9 @@ export type Row = Record<string, string>;
 type Cell = string | number | boolean;
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
-  CurrentBatch: "Batch 01",
-  FeeWithKit: "15000",
-  FeeWithoutKit: "10000",
+  CurrentBatch: "Batch 02",
+  // Full course fee. The starter kit is included free, so there's a single fee for everyone.
+  CourseFee: "7500",
 };
 
 /* ------------------------------------------------------------------ */

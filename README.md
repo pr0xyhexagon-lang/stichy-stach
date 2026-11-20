@@ -13,7 +13,7 @@ There is **no database**. Everything is saved in one Google Spreadsheet with 4 t
 | `Students` | One row per registration: all form fields, Student ID, batch, course fee, status |
 | `Attendance` | One row per student per class date (Present / Absent) |
 | `Payments` | One row per payment (date, amount, method, note) |
-| `Settings` | `CurrentBatch`, `FeeWithKit`, `FeeWithoutKit` |
+| `Settings` | `CurrentBatch`, `CourseFee` (starter kit is included free) |
 
 **Due = CourseFee − sum of that student's payments.** The app works this out, so you never need formulas in the sheet.
 You can edit rows directly in Google Sheets at any time. For example, you can fix a typo or delete a wrong payment.

@@ -3,7 +3,7 @@
  */
 import { appendRows, getRows, updateRows, DEFAULT_SETTINGS, type Row } from "./sheets";
 import { ageFromDob, nowStamp, todayISO, toNumber } from "./format";
-import type { Registration } from "./schema";
+import { STARTER_KIT_NOTE, type Registration } from "./schema";
 import type { AttendanceSheet, Payment, StudentSummary } from "./types";
 import type { z } from "zod";
 import type { attendanceSchema, paymentSchema, settingsSchema, studentPatchSchema } from "./schema";
@@ -18,8 +18,8 @@ export class AppError extends Error {
 
 export interface Settings {
   currentBatch: string;
-  feeWithKit: number;
-  feeWithoutKit: number;
+  /** Full course fee (starter kit included free). */
+  courseFee: number;
 }
 
 export async function getSettings(): Promise<Settings> {
@@ -28,8 +28,7 @@ export async function getSettings(): Promise<Settings> {
   for (const r of rows) if (r.Key) map[r.Key] = r.Value;
   return {
     currentBatch: map.CurrentBatch,
-    feeWithKit: toNumber(map.FeeWithKit),
-    feeWithoutKit: toNumber(map.FeeWithoutKit),
+    courseFee: toNumber(map.CourseFee),
   };
 }
 
@@ -37,8 +36,7 @@ export async function saveSettings(s: z.infer<typeof settingsSchema>) {
   const rows = await getRows("Settings");
   const values: Record<string, string> = {
     CurrentBatch: s.currentBatch,
-    FeeWithKit: String(s.feeWithKit),
-    FeeWithoutKit: String(s.feeWithoutKit),
+    CourseFee: String(s.courseFee),
   };
   const updates: Row[] = [];
   const appends: Row[] = [];
@@ -72,7 +70,7 @@ export async function registerStudent(data: Registration): Promise<{ id: string;
   const seq =
     Math.max(0, ...students.filter((s) => s.StudentID.startsWith(prefix)).map((s) => toNumber(s.StudentID.slice(prefix.length)))) + 1;
   const id = prefix + String(seq).padStart(3, "0");
-  const fee = data.starterKit.startsWith("Yes") ? settings.feeWithKit : settings.feeWithoutKit;
+  const fee = settings.courseFee;
 
   await appendRows("Students", [
     {
@@ -87,7 +85,7 @@ export async function registerStudent(data: Registration): Promise<{ id: string;
       SkillLevel: data.skillLevel,
       ClassMode: data.classMode,
       PreferredDays: data.preferredDays,
-      StarterKit: data.starterKit,
+      StarterKit: STARTER_KIT_NOTE,
       EmergencyName: data.emergencyName,
       EmergencyPhone: data.emergencyPhone,
       AgreedTerms: "Yes",
